@@ -1,38 +1,46 @@
-import { useNavigation } from '@react-navigation/native';
 import React from 'react';
+import { View } from 'react-native'
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../hooks/auth';
-import  {
-  Container,
-  Button,
-  ButtonTitle
+
+import Button from '../../components/Button'
+
+import {
+  Container 
 } from './styles'
 
-export default function Home(){
+export default function Home() {
   const navigator = useNavigation();
   const { signOut } = useAuth();
   const { authData } = useAuth();
 
-  return(
+  return (
     <Container>
-      {authData?.token === 'admin' ? 
+      {authData?.token === 'admin' ?
         (
-          <Button 
-          onPress={() => navigator.navigate("Maps")}>
-            <ButtonTitle>Maps</ButtonTitle>
-          </Button>
+          <View style={{width: '100%', alignItems: 'center'}}>
+            <Button
+              onPress={() => navigator.navigate("Maps")}
+              title="Mapa"
+            />
+            <Button 
+              onPress={() => navigator.navigate("Users")}
+              title="Usuários"
+            />
+          </View>
         )
-      :
-        (
-          <Button 
-        onPress={() => navigator.navigate("CreateNotification")}>
-          <ButtonTitle>Create Notification</ButtonTitle>
-        </Button>
-        )
+        : 0
       }
-      <Button 
-      onPress={signOut}>
-        <ButtonTitle>Sair</ButtonTitle>
-      </Button>
+
+      <Button
+        onPress={() => navigator.navigate("CreateNotification")}
+        title="Criar Notificação"
+      />
+
+      <Button
+        onPress={signOut}
+        title="Sair"
+      />
     </Container>
   );
 }

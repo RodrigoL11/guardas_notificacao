@@ -6,13 +6,14 @@ import {
     MarkTitle
 } from './styles'
 
-interface Props extends TouchableOpacityProps {
+interface Props extends TouchableOpacityProps{
     title: string;
+    onPress: () => void;
 }
 
-export default function SideMenuItem({ title, ...rest }: Props) {
+export default function SideMenuItem({ title, onPress ,...rest }: Props) {
     return(
-        <Container {...rest}>
+        <Container onPress={onPress}>
             <MarkTitle>{title}</MarkTitle>
         </Container>
     );

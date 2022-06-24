@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
-import { Alert, ScrollView } from 'react-native';
+import { Alert } from 'react-native';
 import { collection, addDoc } from "firebase/firestore";
 import { useAuth } from '../../hooks/auth';
 import * as Location from "expo-location";
+import { database } from '../../config/Firebase';
+
+import Button from '../../components/Button'
 
 import {
     Container,
     Title,
-    Button,
-    ButtonTitle,
     Input,
     Label
 } from './styles'
-import { database } from '../../config/Firebase';
 
 export default function CreateNotification(){
-
     const { authData } = useAuth();
     const [title, setTitle] = useState<string>('');
     const [description, setDescription] = useState<string>('');
@@ -55,12 +54,11 @@ export default function CreateNotification(){
     };
 
     return(
-        <ScrollView>
             <Container>
                 <Title>Criar Notificação</Title>
                 <Label>Nome</Label>
                 <Input
-                    style={{backgroundColor: "#ccc"}}
+                    style={{backgroundColor: "#b8b7bb"}}
                     value={authData?.name}
                     editable={false}
                 />
@@ -74,11 +72,11 @@ export default function CreateNotification(){
                     value={description}
                     onChangeText={value => setDescription(value)}
                     multiline={true}
+                    numberOfLines={5}
                 />
-                <Button onPress={createNotification}>
-                    <ButtonTitle>Create Notification</ButtonTitle>
-                </Button>
+                <Button onPress={createNotification}
+                    title="Create Notification"   
+                />
             </Container>
-        </ScrollView>
     );
 }

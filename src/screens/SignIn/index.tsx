@@ -4,12 +4,12 @@ import { Alert, TouchableOpacity } from 'react-native';
 import { useAuth } from '../../hooks/auth';
 import { Entypo } from '@expo/vector-icons';
 
+import Button from '../../components/Button'
+
 import {
   Container,
   Input,
   InputPassword,
-  Button,
-  ButtonTitle,
   Title,
   Footer,
   SubTitle,
@@ -39,13 +39,14 @@ export default function SignIn() {
           onChangeText={value => setPassword(value)}
           placeholder={"Password"}  
         />
-        <Entypo onPress={() => setSecureText(!secureText)} style={{paddingRight: 10}} name={secureText ? 'eye-with-line' : 'eye'} size={20} color="#ccc" />
+        <Entypo onPress={() => setSecureText(!secureText)} style={{paddingRight: 10}} name={secureText ? 'eye-with-line' : 'eye'} size={20} color="#727272" />
       </InputContainer>
-      <Button onPress={() => signIn(email, password).catch((error) => {
-        Alert.alert(error.message, 'Tente novamente')
-      })}>
-        <ButtonTitle>Sign In</ButtonTitle>
-      </Button>
+      <Button 
+        onPress={() => signIn(email, password).catch((error) => {
+          Alert.alert(error.message, 'Tente novamente')
+        })}
+        title="Sign In"
+      />
       <Footer>
         <SubTitle>New to App? </SubTitle>
         <TouchableOpacity onPress={() => navigator.navigate("SignUp")}>

@@ -13,9 +13,8 @@ import {
     Footer,
     SubTitle,
     LinkText,
-    Button,
-    ButtonTitle
 } from '../SignIn/styles'
+import Button from '../../components/Button';
 
 export default function SignUp() {
     const navigator = useNavigation();
@@ -65,7 +64,7 @@ export default function SignUp() {
                         }}
                         placeholder="Password"
                     />
-                    <Entypo onPress={() => setSecureText(!secureText)} style={{paddingRight: 10}} name={secureText ? 'eye-with-line' : 'eye'} size={20} color="#ccc" />
+                    <Entypo onPress={() => setSecureText(!secureText)} style={{paddingRight: 10}} name={secureText ? 'eye-with-line' : 'eye'} size={20} color="#727272" />
                 </InputContainer>
                 <Input
                     value={confirmPassword}
@@ -75,9 +74,10 @@ export default function SignUp() {
                     }}
                     placeholder="Confirm password"
                 />
-                <Button onPress={handleRegistration}>
-                    <ButtonTitle>Sign Up</ButtonTitle>
-                </Button>
+                <Button 
+                    onPress={handleRegistration}
+                    title="Sign Up"    
+                />                
                 <Footer>
                     <SubTitle>Already have an account? </SubTitle>
                     <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={() => navigator.goBack()}>

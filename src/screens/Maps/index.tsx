@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { collection, DocumentData, getDocs, doc, deleteDoc } from 'firebase/firestore';
+import { collection, DocumentData, getDocs, doc, deleteDoc, query, where } from 'firebase/firestore';
 import { database } from '../../config/Firebase'; 
+import isEqual from 'lodash.isequal'
 import * as Location from 'expo-location'
 
 import MapView, {
@@ -22,59 +23,14 @@ import {
   CalloutText,
 } from './styles'
 
-const deleteNotification = async (notification: DocumentData) => {
-  let id: string = "";
-
-  const querySnapshot = await getDocs(collection(database,"Markers"));
-      querySnapshot.forEach((doc) => {
-        notification === doc.data() ? id = doc.id : 0
-      });
-
- await deleteDoc(doc(database, "Markers", id));
-}
-
-const createThreeButtonAlert = (notification: DocumentData) =>{
-  Alert.alert(
-    notification.title,
-    notification.description,
-    [
-      {
-        text: "Deletar",
-        onPress: () => deleteNotification(notification)
-      },
-      {
-        text: "Cancel",
-        onPress: () => console.log("Cancel Pressed"),
-        
-      },
-      { text: "OK", onPress: () => console.log("OK Pressed") }
-    ]
-  );
- 
-}
-
-var initialRegion: Region;
-
-async function getCurrentPosition() {
-  let { status } = await Location.requestForegroundPermissionsAsync();
-
-  if (status !== "granted") {
-      Alert.alert("Ops!", "Permissão de acesso a localização negada.");
-      return;
-  }
-
-  let { coords: { latitude, longitude } } = await Location.getCurrentPositionAsync();
-
-  initialRegion = { latitude, longitude, latitudeDelta: 0.09, longitudeDelta: 0.04 };
-}
-
-getCurrentPosition()
 
 export default function Maps() {
   const [region, setRegion] = useState<Region>();
   const [open, setOpen] = useState<boolean>(false);
-  const [markers, setMarkers] = useState<DocumentData[]>([])
+  const [markers, setMarkers] = useState<DocumentData[]>([]);
+  const [initialRegion, setInitialRegion] = useState<Region>();
 
+  //query db para pegar as marcações
   useEffect(() => {
     async function queryDB(){
       const querySnapshot = await getDocs(collection(database, "Markers"));
@@ -82,12 +38,56 @@ export default function Maps() {
        setMarkers(arr => [...arr, doc.data()])
       });
     }
-  
+
     queryDB();
   }, [])
 
-  function handleNotification(index: number) {
-    console.log()
+  //get initial position
+  useEffect(() => {
+    async function getCurrentPosition() {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+    
+      if (status !== "granted") {
+          Alert.alert("Ops!", "Permissão de acesso a localização negada.");
+          return;
+      }
+    
+      const location = await Location.getCurrentPositionAsync();
+      const { latitude, longitude } = location.coords;
+    
+      setInitialRegion({ latitude, longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 });
+    }
+
+    getCurrentPosition();
+  }, [])
+
+  const deleteNotification = async (notification: DocumentData) => {
+    let id: string = "";
+  
+    const querySnapshot = await getDocs(collection(database, "Markers"));
+    querySnapshot.forEach((doc) => isEqual(doc.data(), notification) ? id = doc.id : 0)
+   
+    await deleteDoc(doc(database, "Markers", id)).then(() => {
+      setMarkers(markers.filter(item => !isEqual(item, notification)))
+    })
+  
+    console.log("Document with ID: ", id, " has been deleted");
+  }
+
+  const createAlert = (notification: DocumentData) =>{
+    Alert.alert(
+      notification.title,
+      notification.description,
+      [
+        {
+          text: "Deletar",
+          onPress: () => deleteNotification(notification)
+        },
+        { 
+          text: "Cancelar"
+        }
+      ]
+    );
   }
 
   return (
@@ -102,25 +102,24 @@ export default function Maps() {
         {markers.map((notification, index) => (
           <Marker
             image={require("../../images/map_marker.png")}
-            key={index}
+            key={index}            
             coordinate={{
               latitude: Number(notification.region.latitude),
               longitude: Number(notification.region.longitude),
             }}            
           >
-            <Callout onPress={() => createThreeButtonAlert(notification)}>
+            <Callout onPress={() => createAlert(notification)}>
               <CalloutContainer>
                 <CalloutTitle>{notification.title}</CalloutTitle>
                 <CalloutText>{notification.description}</CalloutText>
               </CalloutContainer>         
-              
             </Callout>
           </Marker>
         ))}
       </MapView>
       {!open ? null :
         <SideMenu>
-          {markers.map((notification, index) => (
+        {markers.map((notification, index) => (
             <SideMenuItem
               key={index}
               title={notification.title}
@@ -128,8 +127,8 @@ export default function Maps() {
                 const newRegion = {
                   latitude: notification.region.latitude,
                   longitude: notification.region.longitude, 
-                  latitudeDelta: 0.001, 
-                  longitudeDelta: 0.001,
+                  latitudeDelta: 0.0014, 
+                  longitudeDelta: 0.0014,
                 };
                 setRegion(newRegion);
                 setTimeout(() => {
